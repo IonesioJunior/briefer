@@ -5,6 +5,8 @@ services:
       POSTGRES_DB: 'briefer'
       POSTGRES_USER: ${POSTGRES_USERNAME:?error}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?error}
+    networks:
+      - app_net
     healthcheck:
       test:
         [
@@ -22,6 +24,8 @@ services:
     build:
       context: '.'
       dockerfile: 'apps/api/Dockerfile'
+    networks:
+      - app_net
     working_dir: '/app/packages/database'
     command: ['npx', 'prisma', 'migrate', 'deploy']
     environment:
@@ -38,6 +42,8 @@ services:
     build:
       context: 'apps/api'
       dockerfile: 'jupyter.Dockerfile'
+    networks:
+      - app_net
     command:
       - 'sh'
       - '-c'
@@ -58,6 +64,8 @@ services:
     build:
       context: 'ai'
       dockerfile: 'Dockerfile'
+    networks:
+      - app_net
     environment:
       BASIC_AUTH_USERNAME: ${AI_BASIC_AUTH_USERNAME:?error}
       BASIC_AUTH_PASSWORD: ${AI_BASIC_AUTH_PASSWORD:?error}
@@ -78,14 +86,18 @@ services:
       dockerfile: 'apps/web/Dockerfile'
       args:
         NODE_ENV: 'production'
-        NEXT_PUBLIC_API_URL: 'https://api.${TLD:?error}'
-        NEXT_PUBLIC_API_WS_URL: 'wss://api.${TLD:?error}'
-        NEXT_PUBLIC_PUBLIC_URL: 'https://app.${TLD:?error}'
+        NEXT_PUBLIC_API_URL: 'http://api.${TLD:?error}:8080'
+        NEXT_PUBLIC_API_WS_URL: 'ws://api.${TLD:?error}:8080'
+        NEXT_PUBLIC_PUBLIC_URL: 'http://app.${TLD:?error}:3000'
+    networks:
+      app_net:
+        aliases:
+          - app.localhost
     environment:
       NODE_ENV: 'production'
-      NEXT_PUBLIC_API_URL: 'https://api.${TLD:?error}'
-      NEXT_PUBLIC_API_WS_URL: 'wss://api.${TLD:?error}'
-      NEXT_PUBLIC_PUBLIC_URL: 'https://app.${TLD:?error}'
+      NEXT_PUBLIC_API_URL: 'http://api.${TLD:?error}:8080'
+      NEXT_PUBLIC_API_WS_URL: 'ws://api.${TLD:?error}:8080'
+      NEXT_PUBLIC_PUBLIC_URL: 'http://app.${TLD:?error}:3000'
     ports:
       - '3000:3000'
     depends_on:
@@ -99,11 +111,15 @@ services:
       dockerfile: 'apps/api/Dockerfile'
     ports:
       - '8080:8080'
+    networks:
+      app_net:
+        aliases:
+          - api.localhost
     environment:
       NODE_ENV: 'production'
       LOG_LEVEL: 'info'
-      API_URL: 'https://api.${TLD:?error}'
-      FRONTEND_URL: 'https://app.${TLD:?error}'
+      API_URL: 'http://api.${TLD:?error}:8080'
+      FRONTEND_URL: 'http://app.${TLD:?error}:3000'
       TLD: ${TLD:?error}
       LOGIN_JWT_SECRET: ${LOGIN_JWT_SECRET:?error}
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:?error}
@@ -137,6 +153,10 @@ services:
         restart: true
       ai:
         condition: service_healthy
+
+networks:
+  app_net:
+    driver: bridge
 
 volumes:
   jupyter:
