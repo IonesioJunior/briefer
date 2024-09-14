@@ -21,11 +21,11 @@ spec:
           command: ['npx', 'prisma', 'migrate', 'deploy']
           env:
             - name: NODE_ENV
-              value: 'production'
+              value: "{{.Values.api.env}}" 
             - name: LOG_LEVEL
-              value: 'info'
+              value: "{{.Values.api.logLevel}}" 
             - name: POSTGRES_PRISMA_URL
-              value: 'postgresql://{{.Values.postgres.username}}:{{.Values.postgres.password}}@briefer-postgres-service:5432/briefer?schema=public'
+              value: 'postgresql://{{.Values.postgres.username}}:{{.Values.postgres.password}}@{{.Values.postgres.hostname}}:{{.Values.postgres.port}}/{{.Values.postgres.database}}?schema=public'
       restartPolicy: Never
   backoffLimit: 4
 

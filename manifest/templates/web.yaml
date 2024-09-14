@@ -19,22 +19,22 @@ spec:
         image: briefercloud/briefer-web
         livenessProbe:
           exec:
-            command: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USERNAME:?error} -d briefer || exit 1']
+            command: ['CMD-SHELL', 'wget http://localhost:3000']
           initialDelaySeconds: 5
           periodSeconds: 5
           failureThreshold: 3                                                                      
           timeoutSeconds: 5
         env:
         - name: NODE_ENV 
-          value: 'production' 
+          value: {{.Values.web.env}} 
         - name: NEXT_PUBLIC_API_URL 
-          value: "https://api.localhost"
+          value: {{.Values.api.url}} 
         - name: NEXT_PUBLIC_API_WS_URL
-          value: "wss://api.localhost"
+          value: {{.Values.api.wsUrl}} 
         - name: NEXT_PUBLIC_PUBLIC_URL
-          value: "https://app.localhost"
+          value: {{.Values.web.url}} 
         ports:
-        - containerPort: 3000 
+        - containerPort: {{.Values.web.port}} 
           name: web-port
 ---
 apiVersion: v1
@@ -47,5 +47,5 @@ spec:
     app: briefer-web
   ports:
   - protocol: TCP
-    port: 3000 
+    port: {{.Values.web.port}} 
     targetPort: web-port

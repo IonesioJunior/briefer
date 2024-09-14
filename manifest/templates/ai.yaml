@@ -19,24 +19,24 @@ spec:
         image: briefercloud/briefer-ai 
         livenessProbe:
           exec:
-            command: ['CMD-SHELL', 'curl -f http://localhost:8000/ping || exit 1']
+            command: ['CMD-SHELL', 'curl -f http://localhost:{{.Values.ai.port}}/ping || exit 1']
           initialDelaySeconds: 5
           periodSeconds: 5
           failureThreshold: 5                                                                      
           timeoutSeconds: 10 
         env:
         - name: AI_BASIC_AUTH_USERNAME 
-          value: 'briefer' 
+          value: {{.Values.ai.username}} 
         - name: AI_BASIC_AUTH_PASSWORD
-          value: "ADMIN" 
+          value: {{.Values.ai.password}} 
         - name: OPENAI_DEFAULT_MODEL_NAME
           value: "gpt-4o"
         - name: OPENAI_API_KEY 
-          value: "OPENAI_API_KEY"
+          value: {{.Values.ai.apiKey}} 
         - name: PORT 
-          value: "8000"
+          value: "{{.Values.ai.port}}"
         ports:
-        - containerPort: 8000 
+        - containerPort: {{.Values.ai.port}} 
           name: ai-port
 ---
 apiVersion: v1
@@ -49,5 +49,5 @@ spec:
     app: briefer-ai
   ports:
   - protocol: TCP
-    port: 8000 
+    port: {{.Values.ai.port}} 
     targetPort: ai-port

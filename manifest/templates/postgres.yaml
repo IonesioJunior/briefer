@@ -19,7 +19,7 @@ spec:
         image: postgres:latest
         livenessProbe:
           exec:
-            command: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USERNAME:?error} -d briefer || exit 1']
+            command: ['CMD-SHELL', 'pg_isready -U {{.Values.postgres.username}} -d briefer || exit 1']
           initialDelaySeconds: 5
           periodSeconds: 5
           failureThreshold: 3                                                                      
